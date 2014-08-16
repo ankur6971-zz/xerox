@@ -1,0 +1,62 @@
+#!/usr/bin/php
+<?php
+require_once 'Common.php';
+
+if ( !Common::checkCli() ) {
+    die("\nThis script can only be run in commandline...\n");
+}
+
+if( !Common::checkCurlAvailable() ){
+    die("\nPHP5-Curl needs to be enabled for this application. Please enable the module to proceed\n");
+}
+
+if ($argc != Common::NUMBER_OF_ARGS) {
+    die("\nCorrect usage: ./create-issue -u jdoe -p secret https://repository.com/example/test \"The title of my issue\" \"Here's what I did to reproduce the problem\"\n");
+}
+
+$userName       = '';
+$passPhrase     = '';
+$url            = '';
+$repositoryName = '';
+$vendorName     = '';
+
+foreach ($argv as $argIndex => $arguments) {
+    if (strcasecmp($arguments, "-u") == 0) {
+        $userName = $argv[$argIndex + 1]; // The next element is presumed to be the username.
+        continue;
+    }
+    if (strcasecmp($arguments, "-p") == 0) {
+        $passPhrase = $argv[$argIndex + 1]; // The next element is presumed to be the password.
+        continue;
+    }
+    if (preg_match('/^(http|https):\/\/[a-z0-9\/.-]*(issues)$/i', $arguments)) {
+        $url             = $arguments;
+        $otherSegments   = explode("/", $url);
+        $vendorName      = $otherSegments[2];
+        $repositoryName  = $otherSegments[count($otherSegments) - 2];
+        $userNameFromUrl = $otherSegments[count($otherSegments) - 3];
+        if (strcasecmp($userName, $userNameFromUrl) != 0) {
+            die("\nUsername in the url does not match the username provided in the credentials.");
+        }
+        continue;
+    }
+}
+
+$title = $argv[$argc - 2];
+if( Common::checkEmpty($title) ) {
+    die("\nPlease specify the issue title.\n");
+}
+
+$body  = $argv[$argc - 1];
+if( Common::checkEmpty($body) ) {
+    die("\nPlease specify the issue description.\n");
+}
+
+
+if( Common::checkEmpty($url) ) {
+    die("\nMalformed or empty URL.\n");
+}
+
+require_once 'CreateNewIssue.php';
+$issueHandle = new CreateNewIssue($vendorName, $userName, $passPhrase, $url, $repositoryName, $title, $body);
+$issueHandle->createIssue();
