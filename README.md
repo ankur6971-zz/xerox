@@ -8,7 +8,8 @@ Xerox Code Challenge - August 2014
 To post issues to bitbucket and github using PHP
 
 ### Installation / Software Requirements ######
-You need to have the PHP5-Curl library installed for the application to function
+You need to have the PHP5-Curl library installed for the application to function.
+To be able to use the application, you need to checkout all the files (mentioned under the purpose section below) from github to your local system.
 
 ### Correct Usage ######
 ./create-issue -u jdoe -p secret https://bitbucket.org/example/test "Another issue title" "Here's some more reproduction steps"
@@ -25,5 +26,8 @@ You need to have the PHP5-Curl library installed for the application to function
 
 ## Purpose of the files
 > * create-issue : The file that is executed from the commandline.
-> * Common.php: The class that contains the common validations
-> * CreateNewIssue.php: The engine behind the issue creation
+> * CreateIssue.php: The basic features in the engine behind the issue creation
+> * CreateBitbucketIssue.php: The features special to BitBucket issue
+> * CreateGithubIssue.php: The features special to Github issue
+> * Exceptions.php: The features special to BitBucket issue
+> * Validate.php: The class that contains the common validations and data processing algorithm
