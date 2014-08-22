@@ -24,11 +24,11 @@
          * @return bool true if all ok, false otherwise
          */
         public function isEverythingOK() {
-            try {
+            /*try {
                 $this->_checkCliAvailable();
             } catch (CLIAbsentException $cae) {
                 die($cae->getMessage());
-            }
+            }*/
 
             try {
                 $this->checkCurlAvailable();
