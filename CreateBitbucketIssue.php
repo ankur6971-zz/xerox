@@ -11,33 +11,27 @@
      */
     class CreateBitbucketIssue extends CreateIssue {
 
-        private $_issueBodyName;
-        private $_issueTitleName;
-
         function __construct($details) {
-            parent::__construct($details->userName, $details->passPhrase, $details->url, $details->repositoryName);
-            $this->_setIssueTitleName('title');
-            $this->_setIssueTitle($details->title);
-            $this->_setIssueBodyName('content');
-            $this->_setIssueBody($details->body);
-
+            parent::__construct($details->userName, $details->passPhrase);
+            $this->_setUrl($details->vendorName, $details->repoUser, $details->repositoryName);
+            $this->_setIssueTitle('title', $details->title, true);
+            $this->_setIssueBody('content', $details->body, true);
         }
 
-        function _setIssueTitleName($titleName) {
-            $this->_issueTitleName = $titleName;
+
+        /**
+         * Set the server url where the issue will be created for this vendor. A typical bitbucket issue format would be:<br/>
+         * https://bitbucket.org/api/1.0/repositories/:username/:repository-name/issues
+         *
+         * @param string $vendorName      The hostname of the service provider
+         * @param string $repositoryOwner The person who created the target repository
+         * @param string $repositoryName  The name of the target repository
+         */
+        private function _setUrl($vendorName, $repositoryOwner, $repositoryName) {
+            $apiUrl = "https://$vendorName/api/1.0/repositories/$repositoryOwner/$repositoryName/issues";
+            $this->_setApiUrl($apiUrl);
         }
 
-        function _setIssueTitle($title) {
-            parent::_setIssueTitle($title, true);
-        }
-
-        function _setIssueBodyName($bodyName) {
-            $this->_issueBodyName = $bodyName;
-        }
-
-        function _setIssueBody($body) {
-            parent::_setIssueBody($body, true);
-        }
 
         /**
          * Get the data to be sent to the webservice.
@@ -45,7 +39,7 @@
          * @return string The data to be sent, in url encoded form
          */
         private function _getPostData() {
-            $postString = parent::getPostData($this->_issueTitleName, $this->_issueBodyName);
+            $postString = $this->_getPostArray();
             $string     = '';
             foreach ($postString as $postIndex => $postValue) {
                 $string .= $postIndex . '=' . $postValue . '&';
@@ -54,9 +48,9 @@
             return rtrim($string, '&');
         }
 
-        public function createIssue() {
+        function createIssue($verbose = false) {
             $postString  = $this->_getPostData();
-            $information = parent::createIssue($postString, false);
+            $information = $this->_sendIssue($postString, $verbose);
             if ($information['http_code'] != 200) {
                 $errorMessage = array("message" => "There was an error processing your request. Please retry.");
                 throw new WebServiceException(json_encode($errorMessage));

@@ -12,9 +12,9 @@ You need to have the PHP5-Curl library installed for the application to function
 To be able to use the application, you need to checkout all the files (mentioned under the purpose section below) from github to your local system.
 
 ### Correct Usage ######
-./create-issue -u jdoe -p secret https://bitbucket.org/api/1.0/repositories/:user/:repo-name/issues "Another issue title" "Here's some more reproduction steps"
+./create-issue -u jdoe -p secret https://bitbucket.org/:user/:repo-name "Another issue title" "Here's some more reproduction steps"
 OR
-./create-issue -u jdoe -p secret https://api.github.com/repos/:user/:repo-name/issues "Another issue title" "Here's some more reproduction steps"
+./create-issue -u jdoe -p secret https://github.com/:user/:repo-name "Another issue title" "Here's some more reproduction steps"
 
 ### Validations that have been made ######
 > * username follows immediately after "-u"
@@ -23,7 +23,6 @@ OR
 >> * http or https and followed by a :,
 >> * //
 >> * combination of any number of alphabets, /, ., -
->> * the word 'issues' (as both the urls given in the task had issues in their url)
 > * issue title and issue body are mandatory
 
 ## Purpose of the files

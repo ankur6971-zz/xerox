@@ -98,21 +98,6 @@
 
 
         /**
-         * Check if Username in the url matches the username provided via the <code>-u</code> option
-         *
-         * @param string $userName        The username from the -u option
-         * @param string $userNameFromUrl The username from the repository url
-         *
-         * @throws InvalidUsernameException If the two usernames do not match.
-         */
-        private function _checkUserName($userName, $userNameFromUrl) {
-            if (strcasecmp($userName, $userNameFromUrl) != 0) {
-                throw new InvalidUsernameException();
-            }
-        }
-
-
-        /**
          * Parse the input and find out the following:
          * <ul>
          * <li>Username</li>
@@ -126,8 +111,9 @@
          *
          * @return stdClass A class containing the above mentioned details
          */
-        public function _parseDetails() {
+        public function parseDetails() {
             $issueDetails = new stdClass();
+            $url = '';
 
             foreach ($this->_argv as $argIndex => $arguments) {
                 if (strcasecmp($arguments, "-u") == 0) {
@@ -138,11 +124,13 @@
                     $issueDetails->passPhrase = $this->_argv[$argIndex + 1]; // The next element is presumed to be the password.
                     continue;
                 }
-                if (preg_match('/^(http|https):\/\/[a-z0-9\/.-]*(issues)$/i', $arguments)) {
-                    $issueDetails->url            = $arguments;
-                    $otherSegments                = explode("/", $issueDetails->url);
-                    $issueDetails->vendorName     = $otherSegments[2];
-                    $issueDetails->repositoryName = $otherSegments[count($otherSegments) - 2];
+                if (preg_match('/^(http|https):\/\/[a-z0-9\/.-]*$/i', $arguments)) {
+                    $url                          = $arguments;
+                    $otherSegments                = parse_url($url);
+                    $issueDetails->vendorName     = $otherSegments['host'];
+                    $path                         = explode("/", $otherSegments['path']);
+                    $issueDetails->repoUser       = $path[1];
+                    $issueDetails->repositoryName = $path[2];
                     continue;
                 }
             }
@@ -164,8 +152,8 @@
             }
 
             try {
-                $errorMessage = "\nPlease specify the issue description.\n";
-                $this->_checkEmpty($issueDetails->url, $errorMessage);
+                $errorMessage = "\nPlease specify the repository url.\n";
+                $this->_checkEmpty($url, $errorMessage);
             } catch (EmptyStringException $ese) {
                 die($ese->getMessage());
             }

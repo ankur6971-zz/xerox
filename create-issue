@@ -4,14 +4,14 @@
     require_once 'Validate.php';
     $validate = new Validate($argv, $argc);
     if ($validate->isEverythingOK()) {
-        $issueDetails = $validate->_parseDetails();
+        $issueDetails = $validate->parseDetails();
         switch ($issueDetails->vendorName) {
             case 'bitbucket.org':
                 require_once 'CreateBitbucketIssue.php';
                 $issueHandle = new CreateBitbucketIssue($issueDetails);
                 break;
-            case 'api.github.com':
-                require_once 'CreateGithubIssue.php';
+            case 'github.com':
+            require_once 'CreateGithubIssue.php';
                 $issueHandle = new CreateGithubIssue($issueDetails);
                 break;
             default:

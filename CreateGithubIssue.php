@@ -11,33 +11,28 @@
      */
     class CreateGithubIssue extends CreateIssue {
 
-        private $_issueBodyName;
-        private $_issueTitleName;
-
         function __construct($details) {
-            parent::__construct($details->userName, $details->passPhrase, $details->url, $details->repositoryName);
-            $this->_setIssueTitleName('title');
-            $this->_setIssueTitle($details->title);
-            $this->_setIssueBodyName('body');
-            $this->_setIssueBody($details->body);
+            parent::__construct($details->userName, $details->passPhrase);
+            $this->_setUrl($details->vendorName, $details->repoUser, $details->repositoryName);
+            $this->_setIssueTitle('title', $details->title);
+            $this->_setIssueBody('body', $details->body);
 
         }
 
-        function _setIssueTitleName($titleName) {
-            $this->_issueTitleName = $titleName;
+
+        /**
+         * Set the server url where the issue will be created for this vendor. A typical github issue format would be:<br/>
+         * https://api.github.com/repos/:username/:repository-name/issues
+         *
+         * @param string $vendorName      The hostname of the service provider
+         * @param string $repositoryOwner The person who created the target repository
+         * @param string $repositoryName  The name of the target repository
+         */
+        private function _setUrl($vendorName, $repositoryOwner, $repositoryName) {
+            $apiUrl = "https://api.$vendorName/repos/$repositoryOwner/$repositoryName/issues";
+            $this->_setApiUrl($apiUrl);
         }
 
-        function _setIssueTitle($title) {
-            parent::_setIssueTitle($title);
-        }
-
-        function _setIssueBodyName($bodyName) {
-            $this->_issueBodyName = $bodyName;
-        }
-
-        function _setIssueBody($body) {
-            parent::_setIssueBody($body);
-        }
 
         /**
          * Get the data to be send to the webservice
@@ -45,12 +40,12 @@
          * @return string The data to be sent, in JSON encoded form
          */
         private function _getPostData() {
-            return json_encode(parent::getPostData($this->_issueTitleName, $this->_issueBodyName));
+            return json_encode($this->_getPostArray());
         }
 
-        public function createIssue() {
+        function createIssue($verbose = false) {
             $postString  = $this->_getPostData();
-            $information = parent::createIssue($postString, false);
+            $information = $this->_sendIssue($postString, $verbose);
             if ($information['http_code'] != 200) {
                 throw new WebServiceException($information['result']);
             } else {
